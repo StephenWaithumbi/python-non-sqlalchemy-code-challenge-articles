@@ -1,136 +1,155 @@
 class Article:
     all = []
     def __init__(self, author, magazine, title):
-        if not isinstance(author, Author):
-            raise ValueError("Must be of type Author")
-        if not isinstance(magazine, Magazine):
-            raise ValueError("Magazine must be an instance of Magazine")
+        self.author = author
+        self.magazine = magazine
+        self.title = title
+        self.all.append(self)
         
-        if not isinstance(title, str) or not (5 <= len(title) <= 50):
-            raise ValueError("Titles must be between 5 and 50 characters")
-
-        self._author = author
-        self._magazine = magazine
-        self._title = title
-        author.articles().append(self)
-        magazine.articles().append(self)
-        Article.all.append(self)
-
     @property
     def author(self):
         return self._author
-
+    
     @author.setter
-    def author(self, value):
-        if not isinstance(value, Author):
-            raise ValueError("Author must be an instance of Author")
-        self._author = value
-
+    def author(self, author):
+        if isinstance(author, Author):
+            self._author = author
+        else:
+            raise ValueError (
+                'author must be an instance of Author'
+            )
+    
     @property
     def magazine(self):
         return self._magazine
-
+    
     @magazine.setter
-    def magazine(self, value):
-        if not isinstance(value, Magazine):
-            raise ValueError("Magazine must be an instance of Magazine")
-        self._magazine = value
-
+    def magazine(self, magazine):
+        if isinstance(magazine, Magazine):
+            self._magazine = magazine
+        else:
+            raise ValueError ('magazine must be an instance of Author')
+            
     @property
     def title(self):
         return self._title
-
+    
     @title.setter
     def title(self, title):
-        if hasattr(self, '_title'):
-            raise AttributeError("Title can not change")
-        self._title = title 
-
-class Magazine:
-    def __init__(self, name, category):
-        if not isinstance(name, str) or not (2 <= len(name) <= 16):
-            raise ValueError("Names must be between 2 and 16 characters")
-        if not isinstance(category, str) or len(category) <= 0:
-            raise ValueError("Categories must be longer than 0 characters")
-        self._name = name
-        self._category = category
-        self._articles = []
-
-    @property
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, value):
-        if not isinstance(value, str) or not (2 <= len(value) <= 16):
-            raise ValueError("Names must be between 2 and 16 characters")
-        self._name = value
-
-    @property
-    def category(self):
-        return self._category
-
-    @category.setter
-    def category(self, value):
-        if not isinstance(value, str) or len(value) <= 0:
-            raise ValueError("ategories must be longer than 0 characters")
-        self._category = value
-
-    def articles(self):
-        return self._articles
-
-    def contributors(self):
-        return list(set(article.author for article in self._articles))
-
-    def article_titles(self):
-        if not self._articles:
-            return None
-        return [article.title for article in self._articles]
-
-    def contributing_authors(self):
-        if not self._articles:
-            return None
+        if hasattr(self, 'title'):
+            raise ValueError ('name cannot be changed after instantiated')
         
-        count = {}
-        for article in self._articles:
-            count[article.author] = count.get(article.author, 0) + 1
+        if not isinstance(title, str) and 5 <= len(title) <= 50:
+            raise ValueError ('Title must be between 5 to 50 characters')
+            
+        else:
+            self._title = title
         
-        contributing_authors = [author for author, count in count.items() if count > 2]        
-        
-        return contributing_authors if contributing_authors else None
-
-
- 
-
 class Author:
     def __init__(self, name):
-        if not isinstance(name, str) or len(name) <= 0:
-            raise ValueError("Names must be longer than 0 characters")
-        self._name = name
-        self._articles = []
+        self.name = name
+        self.author_articles = []
 
     @property
     def name(self):
         return self._name
     
-    property
+    @name.setter
+    def name(self, name):
+        if hasattr(self, 'name'):
+            raise ValueError ('name must not be changed after instantiation')
+        if not isinstance(name, str) and not len(name) >0:
+            raise ValueError ('Name must be more than 0 characters')
+        self._name = name
+        
     def articles(self):
-        return self._articles
+        return [article for article in Article.all if article.author == self]
 
     def magazines(self):
-        return list(set(article.magazine for article in self._articles))
+        return list(set(article.magazine for article in Article.all if article.author == self))
 
     def add_article(self, magazine, title):
         if not isinstance(magazine, Magazine):
-            raise ValueError("magazine must be an instance of Magazine class")
+            raise ValueError('magazine must be an instance of Magazine')
+        
+        if not isinstance(title, str) or not (5 <= len(title) <= 50):
+            raise ValueError('Title must be a string and between 5 to 50 characters')
+        
         article = Article(self, magazine, title)
-        self._articles.append(article)
-        magazine.articles().append(article)
+        self.author_articles.append(article)
+        
         return article
 
     def topic_areas(self):
-        if not self._articles:
+        if self.author_articles:
+            return list(set(magazine.category for magazine in self.magazines()))
+        else:
             return None
-        return list(set(magazine.category for magazine in self.magazines()))
 
+class Magazine:
+    all = []
+    def __init__(self, name, category):
+        self.name = name
+        self.category = category
+        self.myarticles = []
+        
+        self.all.append(self)
+        
+    @property
+    def name(self):
+        return self._name
 
+    @name.setter
+    def name(self, name):
+        if isinstance(name, str) and 2<= len(name)<= 16:
+            self._name = name
+        else:
+            raise ValueError('Nam must be a string')
+        
+    @property
+    def category(self):
+        return self._category
+    
+    @category.setter
+    def category(self, category):
+        if isinstance(category, str) and len(category) >0:
+            self._category = category
+        else:
+            raise ValueError (
+                'Category must be a string'
+            )
+    def articles(self):
+        return [article for article in Article.all if article.magazine == self]
+
+    def contributors(self):
+        return list(set(article.author for article in self.articles()))
+
+    def article_titles(self):
+        articles = self.articles()
+        if articles:
+            return [article.title for article in articles]
+        else:
+            return None
+
+    def contributing_authors(self):
+        constributing_authors = []
+        for author in self.contributors():
+            article_count = len([article for article in  Article.all if article.author == author and article.magazine == self])
+            if article_count >2:
+                constributing_authors.append(author)
+        if constributing_authors:
+            return constributing_authors
+        else:
+            return None
+        
+    @classmethod
+    def top_publisher(cls):
+        if not cls.all:
+            return None
+        
+        magazines_with_articles = [magazine for magazine in cls.all if magazine.articles()]
+        if not magazines_with_articles: 
+            return None
+        
+        top_magazine = max(magazines_with_articles, key=lambda magazine: len(magazine.articles()))
+        return top_magazine

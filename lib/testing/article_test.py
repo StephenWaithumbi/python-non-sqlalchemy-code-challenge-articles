@@ -25,8 +25,8 @@ class TestArticle:
         article_1 = Article(author, magazine, "How to wear a tutu with style")
 
         # comment out the next two lines if using Exceptions
-        article_1.title = 500
-        assert article_1.title == "How to wear a tutu with style"
+        # article_1.title = 500
+        # assert article_1.title == "How to wear a tutu with style"
         
         assert isinstance(article_1.title, str)
 
@@ -114,3 +114,4 @@ class TestArticle:
         assert len(Article.all) == 2
         assert article_1 in Article.all
         assert article_2 in Article.all
+        
